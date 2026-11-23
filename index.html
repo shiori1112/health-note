@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f8dce7">
+<title>わたしの体調ノート</title>
+<style>
+:root{--pink:#d982a4;--deep:#a94f76;--pale:#fff3f7;--line:#efd2de;--ink:#59434d;--muted:#967d87}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(#fff0f5,#fffafd 340px);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",sans-serif;font-size:15px}
+header{text-align:center;padding:24px 14px 10px}h1{margin:0;color:var(--deep);font-size:23px}.sub{font-size:12px;color:var(--muted);margin:6px}
+main{max-width:700px;margin:auto;padding:0 13px 42px}.tabs{display:flex;gap:7px;position:sticky;top:0;z-index:3;background:#fff8fbed;padding:8px 0;overflow-x:auto}
+.tabs button{white-space:nowrap;border:1px solid var(--line);background:#fff;color:var(--deep);border-radius:20px;padding:9px 13px;font:inherit}.tabs button.active{background:var(--pink);color:#fff}
+.panel{display:none}.panel.active{display:block}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 4px 15px #d78ca512}
+h2{font-size:17px;color:var(--deep);margin:0 0 12px}.row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;min-height:36px;padding:4px 0}
+label.check{display:flex;align-items:center;gap:8px}input[type=checkbox]{width:19px;height:19px;accent-color:var(--pink);margin:0}
+input,select,textarea{font:inherit;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px;background:#fff}input[type=date]{max-width:175px}textarea{width:100%;min-height:95px}
+button.primary{border:0;background:var(--pink);color:#fff;border-radius:12px;padding:11px 15px;font:inherit;font-weight:700}
+button.secondary,.mini{border:1px solid var(--line);background:#fff;color:var(--deep);border-radius:10px;padding:8px 11px;font:inherit}
+.counter{display:inline-flex;align-items:center;gap:10px}.counter button{border:0;background:#fbe6ee;color:var(--deep);font-size:19px;width:32px;height:32px;border-radius:50%}.count{font-weight:700;min-width:16px;text-align:center}
+.box{background:var(--pale);padding:12px;border-radius:13px;line-height:1.9;margin-top:10px}.muted,.hint{color:var(--muted);font-size:12px;line-height:1.6}.status{font-size:12px;color:var(--muted);min-height:18px;margin-top:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{background:var(--pale);border-radius:12px;padding:12px}.metric b{display:block;font-size:20px;color:var(--deep);margin-top:4px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.calendar-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.calendar-head button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 11px;color:var(--deep)}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.dow{text-align:center;color:var(--muted);font-size:11px;padding:5px 0}.day{min-height:52px;border:1px solid #f2e1e8;border-radius:9px;background:#fff;text-align:left;padding:5px;font:inherit;color:var(--ink);font-size:12px}.day.today{border:2px solid var(--pink)}.day.selected{background:#ffe8f0}.day .dot{display:block;color:var(--deep);font-size:10px}
+.pill{display:inline-block;background:#fbe6ee;color:var(--deep);border-radius:20px;padding:3px 8px;font-size:11px;margin:2px}canvas{width:100%;height:235px;display:block}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border-bottom:1px solid var(--line);padding:8px 5px;text-align:left}th{color:var(--deep)}.actions button{min-height:42px}
+@media(min-width:520px){.day{min-height:65px;padding:7px}.grid2{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header><h1>🌸 わたしの体調ノート</h1><p class="sub">毎日の小さな変化を、やさしく記録。</p></header>
+<main>
+<nav class="tabs"><button class="active" data-tab="daily">今日の記録</button><button data-tab="calendarPanel">月間カレンダー</button><button data-tab="analysis">グラフ・分析</button><button data-tab="medPanel">服薬状況</button></nav>
+<section id="daily" class="panel active">
+<div class="card row"><label for="recordDate">📅 記録する日</label><input id="recordDate" type="date"></div>
+<div class="card"><h2>🌸 体調</h2>
+<div class="row"><label class="check"><input type="checkbox" id="headache">頭痛</label><select id="headacheLevel"><option>軽め</option><option>普通</option><option>重め</option></select></div>
+<div class="row"><label class="check"><input type="checkbox" id="stomach">腹痛</label></div><div class="row"><label class="check"><input type="checkbox" id="diarrhea">下痢</label></div><div class="row"><label class="check"><input type="checkbox" id="dizzy">めまい</label></div><div class="row"><label class="check"><input type="checkbox" id="faint">脳貧血</label></div><div class="row"><label class="check"><input type="checkbox" id="periodPain">生理痛</label></div><div class="row"><label class="check"><input type="checkbox" id="oversleep">過眠</label></div><div class="row"><label class="check"><input type="checkbox" id="insomnia">不眠</label></div><div class="row"><label class="check"><input type="checkbox" id="unmotivated">無気力</label></div></div>
+<div class="card"><h2>🌸 今日の総合的な体調</h2><div class="row"><label for="healthRating">今日の調子</label><select id="healthRating"><option value="">選択してください</option><option value="good">😊 良い</option><option value="normal">😐 普通</option><option value="bad">😣 悪い</option></select></div></div>
+<div class="card"><h2>🌸 排便</h2><div class="row"><label class="check"><input type="checkbox" id="bowel">排便あり</label><span class="counter"><button id="minus" type="button">−</button><span id="bowelCount" class="count">0</span><button id="plus" type="button">＋</button>回</span></div></div>
+<div class="card"><h2>🌸 生理</h2><label class="check"><input type="checkbox" id="menstruation">生理中</label><p class="hint">生理中の日だけチェックしてください。</p></div>
+<div class="card"><h2>🌸 薬</h2>
+<div class="row"><label class="check"><input type="checkbox" id="morningMeds">朝の薬</label></div><div class="row"><label class="check"><input type="checkbox" id="nightMeds">夜の薬</label></div><div class="row"><label class="check"><input type="checkbox" id="herb1">漢方（1回目）</label></div><div class="row"><label class="check"><input type="checkbox" id="herb2">漢方（2回目）</label></div><div class="row"><label class="check"><input type="checkbox" id="lesiton1">Lesiton（1回目）</label></div><div class="row"><label class="check"><input type="checkbox" id="lesiton2">Lesiton（2回目）</label></div><div class="row"><label class="check"><input type="checkbox" id="celecolen">Celecolen</label></div><div class="row"><label class="check"><input type="checkbox" id="fluzine">Fluzine</label></div></div>
+<div class="card"><h2>🌸 気温・気圧・場所</h2><button class="primary" id="weatherBtn" type="button">📍 現在地の気温・気圧を取得</button>
+<div class="box"><div>場所：<b id="place">未取得</b></div><div>🌞 今日の最高気温：<b id="tempMax">—</b></div><div>❄️ 今日の最低気温：<b id="tempMin">—</b></div><div>気圧：<b id="pressure">—</b></div><div id="weatherMarks" class="row"></div>
+<p class="hint">高低気圧の目安は1013.25hPa、気温の急変は前日比±3℃以上です。気象データの目安であり、医学的な判定ではありません。</p></div><div class="status" id="weatherStatus"></div></div>
+<div class="card"><h2>🌸 備考</h2><textarea id="notes" placeholder="体調の変化、食事、睡眠、気になったことなど…"></textarea></div>
+<div class="actions"><button class="primary" id="saveBtn">記録を保存</button><button class="secondary" id="exportBtn">記録を書き出す</button><button class="secondary" id="clearBtn">この日の記録をクリア</button></div><div class="status" id="saveStatus"></div>
+</section>
+<section id="calendarPanel" class="panel"><div class="card"><h2>📅 月間カレンダー</h2><div class="calendar-head"><button id="prevMonth">‹ 前月</button><b id="monthLabel"></b><button id="nextMonth">翌月 ›</button></div><div class="calendar" id="calendar"></div><p class="hint">🌸 生理中　● 頭痛　◆ 下痢　☾ 過眠　▲ めまい　! 総合評価「悪い」。日付をタップすると記録を確認できます。</p></div></section>
+<section id="analysis" class="panel">
+<div class="card"><h2>📊 体調の発生頻度</h2><p class="hint">各症状の発生頻度と、その期間の総合評価です。</p><div class="row">集計期間：<select id="analysisRange"><option value="7">直近7日</option><option value="30" selected>直近30日</option><option value="90">直近3か月</option><option value="all">全期間</option></select></div><div id="overallSummary"></div><canvas id="symptomChart" width="620" height="340"></canvas></div>
+<div class="card"><h2>🌦️ 気圧と体調の関係</h2><p class="hint">気圧の高さ（1013.25hPaを目安）と前日からの変化（±3hPa以上を急変の目安）を分けて比較します。割合は各条件の日のうち症状があった割合です。</p><div id="pressureSummary"></div></div>
+<div class="card"><h2>🌸 生理中と体調の関係</h2><p class="hint">生理中にチェックした日と、それ以外の日の症状・総合評価を比較します。</p><div id="periodSummary"></div></div>
+<div class="card"><h2>💊 Fluzineと過眠・無気力</h2><p class="hint">Fluzineをチェックした日／していない日で、過眠・無気力が記録された割合を比較します。副作用の判定ではありません。</p><div id="fluzineSummary"></div></div>
+</section>
+<section id="medPanel" class="panel"><div class="card"><h2>💊 服薬状況</h2><p class="hint">日ごとのチェックを集計します。</p><div class="row">集計期間：<select id="medRange"><option value="7">直近7日</option><option value="30" selected>直近30日</option><option value="all">全期間</option></select></div><div id="medSummary"></div></div></section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const fields=['headache','headacheLevel','stomach','diarrhea','healthRating','dizzy','faint','periodPain','oversleep','insomnia','unmotivated','bowel','bowelCount','diarrhea','menstruation','morningMeds','nightMeds','herb1','herb2','lesiton1','lesiton2','celecolen','fluzine','place','tempMax','tempMin','pressure','notes'];
+const symptoms={headache:'頭痛',stomach:'腹痛',diarrhea:'下痢',dizzy:'めまい',faint:'脳貧血',periodPain:'生理痛',oversleep:'過眠',insomnia:'不眠',unmotivated:'無気力'};
+const medIds=['lesiton1','lesiton2','celecolen'],medNames={lesiton1:'Lesiton（1回目）',lesiton2:'Lesiton（2回目）',celecolen:'Celecolen',fluzine:'Fluzine'};
+const today=()=>{let d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+$('recordDate').value=today();let viewMonth=new Date();
+const storageKey=d=>'healthnote_'+d;
+function records(){let out={};for(let i=0;i<localStorage.length;i++){let k=localStorage.key(i);if(k.startsWith('healthnote_'))try{out[k.slice(11)]=JSON.parse(localStorage.getItem(k))}catch(e){}}return out}
+function read(){let o={};fields.forEach(id=>{let e=$(id);o[id]=e.type==='checkbox'?e.checked:(['place','tempMax','tempMin','pressure'].includes(id)?e.textContent:e.value)});return o}
+function fill(o){fields.forEach(id=>{let e=$(id),v=o?.[id];if(e.type==='checkbox')e.checked=!!v;else if(['place','tempMax','tempMin','pressure'].includes(id))e.textContent=v||(id==='place'?'未取得':'—');else e.value=v!==undefined?v:(id==='bowelCount'?'0':'')});$('bowelCount').textContent=$('bowelCount').value||'0';weatherMarks()}
+function save(silent=false){localStorage.setItem(storageKey($('recordDate').value),JSON.stringify(read()));if(!silent)$('saveStatus').textContent='保存しました 🌸';renderAll()}
+function load(){let s=localStorage.getItem(storageKey($('recordDate').value));fill(s?JSON.parse(s):null);$('saveStatus').textContent=s?'保存済みの記録を表示しています。':'この日の記録はまだありません。'}
+$('saveBtn').onclick=()=>save();$('recordDate').onchange=load;
+$('plus').onclick=()=>{let n=+$('bowelCount').textContent+1;$('bowelCount').textContent=n;$('bowelCount').value=n;$('bowel').checked=true;save(true)};
+$('minus').onclick=()=>{let n=Math.max(0,+$('bowelCount').textContent-1);$('bowelCount').textContent=n;$('bowelCount').value=n;if(!n)$('bowel').checked=false;save(true)};
+$('clearBtn').onclick=()=>{if(confirm('この日の記録を削除しますか？')){localStorage.removeItem(storageKey($('recordDate').value));load();renderAll()}};
+$('exportBtn').onclick=()=>{let blob=new Blob([JSON.stringify(records(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='体調記録.json';a.click();URL.revokeObjectURL(a.href)};
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));renderAll()});
+function prevRecord(date){let d=new Date(date+'T12:00:00');d.setDate(d.getDate()-1);let k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;return records()[k]}
+function weatherMarks(){let p=parseFloat($('pressure').textContent),mx=parseFloat($('tempMax').textContent),marks=[];if(Number.isFinite(p))marks.push(p>=1013.25?'🔵 高気圧寄り':'🌀 低気圧寄り');let prev=prevRecord($('recordDate').value),pmx=parseFloat(prev?.tempMax||'');if(Number.isFinite(mx)&&Number.isFinite(pmx)){let d=mx-pmx;if(d>=3)marks.push(`🌡️ 最高気温が前日より急上昇（+${d.toFixed(1)}℃）`);else if(d<=-3)marks.push(`🥶 最高気温が前日より急低下（${d.toFixed(1)}℃）`)}$('weatherMarks').innerHTML=marks.map(x=>`<span class="pill">${x}</span>`).join('')}
+$('weatherBtn').onclick=()=>{let s=$('weatherStatus');s.textContent='位置情報を確認しています…';if(!navigator.geolocation){s.textContent='このブラウザでは位置情報を利用できません。';return}navigator.geolocation.getCurrentPosition(async pos=>{try{let lat=pos.coords.latitude,lon=pos.coords.longitude;let url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=pressure_msl&daily=temperature_2m_max,temperature_2m_min&forecast_days=1&timezone=auto`;let r=await fetch(url);if(!r.ok)throw Error();let j=await r.json(),p=j.current.pressure_msl,mx=j.daily.temperature_2m_max[0],mn=j.daily.temperature_2m_min[0];let place='';try{let g=await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ja`);let x=await g.json();place=[x.city||x.locality,x.principalSubdivision,x.countryName].filter((v,i,a)=>v&&a.indexOf(v)===i).join('・')}catch(e){}$('place').textContent=place||`${lat.toFixed(2)}, ${lon.toFixed(2)}`;$('tempMax').textContent=mx+' ℃';$('tempMin').textContent=mn+' ℃';$('pressure').textContent=p+' hPa';weatherMarks();save(true);s.textContent='今日の最高・最低気温と気圧を記録しました 🌸'}catch(e){s.textContent='気象情報を取得できませんでした。通信状況を確認してください。'}},e=>{s.textContent=e.code===1?'位置情報が許可されていません。ブラウザの設定をご確認ください。':'位置情報を取得できませんでした。'},{timeout:15000,maximumAge:300000})};
+function renderCalendar(){let y=viewMonth.getFullYear(),m=viewMonth.getMonth(),r=records();$('monthLabel').textContent=`${y}年${m+1}月`;let box=$('calendar');box.innerHTML='';['日','月','火','水','木','金','土'].forEach(d=>{let x=document.createElement('div');x.className='dow';x.textContent=d;box.append(x)});for(let i=0;i<new Date(y,m,1).getDay();i++)box.append(document.createElement('div'));for(let n=1;n<=new Date(y,m+1,0).getDate();n++){let d=`${y}-${String(m+1).padStart(2,'0')}-${String(n).padStart(2,'0')}`,b=document.createElement('button');b.className='day'+(d===today()?' today':'')+(d===$('recordDate').value?' selected':'');let rec=r[d]||{};let marks=[];if(rec.menstruation)marks.push('🌸');if(rec.headache)marks.push('●');if(rec.diarrhea)marks.push('◆');if(rec.oversleep)marks.push('☾');if(rec.dizzy)marks.push('▲');if(rec.healthRating==='bad')marks.push('!');b.innerHTML=`<span>${n}</span>${marks.length?`<span class="dot">${marks.join(' ')}</span>`:''}`;if(rec.menstruation)b.style.background='#fff0f5';b.onclick=()=>{$('recordDate').value=d;load();document.querySelector('[data-tab="daily"]').click();scrollTo(0,0)};box.append(b)}}
+$('prevMonth').onclick=()=>{viewMonth.setMonth(viewMonth.getMonth()-1);renderCalendar()};$('nextMonth').onclick=()=>{viewMonth.setMonth(viewMonth.getMonth()+1);renderCalendar()};
+function bars(items){let c=$('symptomChart'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);let max=Math.max(1,...items.map(x=>x.v)),left=115,row=(h-15)/items.length;items.forEach((x,i)=>{let y=8+i*row;ctx.font='15px sans-serif';ctx.fillStyle='#80616f';ctx.fillText(x.label,4,y+row*.65);ctx.fillStyle='#f7e4ec';ctx.fillRect(left,y+5,w-left-35,row-10);ctx.fillStyle='#d982a4';ctx.fillRect(left,y+5,(w-left-35)*x.v/max,row-10);ctx.fillStyle='#80616f';ctx.fillText(x.v+'日',w-30,y+row*.65)})}
+function pctCount(a,k){let n=a.filter(r=>!!r[k]).length;return a.length?`${Math.round(n/a.length*100)}%（${n}/${a.length}日）`:'—'}
+function renderAnalysis(){
+ let all=records(),dates=Object.keys(all).sort(),range=$('analysisRange')?.value||'30';
+ if(range!=='all'){let days=range==='90'?90:+range,cut=new Date();cut.setHours(0,0,0,0);cut.setDate(cut.getDate()-(days-1));dates=dates.filter(d=>new Date(d+'T12:00:00')>=cut)}
+ let vals=dates.map(d=>({...all[d],_date:d}));
+ let good=vals.filter(r=>r.healthRating==='good').length,normal=vals.filter(r=>r.healthRating==='normal').length,bad=vals.filter(r=>r.healthRating==='bad').length;
+ $('overallSummary').innerHTML=`<div class="grid2"><div class="metric">😊 良い<b>${good}日</b></div><div class="metric">😐 普通<b>${normal}日</b></div><div class="metric">😣 悪い<b>${bad}日</b></div><div class="metric">集計対象<b>${vals.length}日</b></div></div>`;
+ bars(Object.entries(symptoms).map(([k,v])=>({label:v,v:vals.filter(r=>r[k]).length})));
+ let withP=vals.filter(r=>Number.isFinite(parseFloat(r.pressure))),pressureHtml='';
+ for(let [name,fn] of [['低気圧寄り',r=>parseFloat(r.pressure)<1013.25],['高気圧寄り',r=>parseFloat(r.pressure)>=1013.25]]){
+  let a=withP.filter(fn);pressureHtml+=`<h3>${name}（${a.length}日）</h3><table><tr><th>症状</th><th>発生率</th></tr>${Object.keys(symptoms).map(k=>`<tr><td>${symptoms[k]}</td><td>${pctCount(a,k)}</td></tr>`).join('')}</table>`;
+ }
+ let byDate=Object.fromEntries(vals.map(r=>[r._date,r]));
+ let deltas=withP.map(r=>{let d=new Date(r._date+'T12:00:00');d.setDate(d.getDate()-1);let key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`,prev=byDate[key];return prev&&Number.isFinite(parseFloat(prev.pressure))?{r,delta:parseFloat(r.pressure)-parseFloat(prev.pressure)}:null}).filter(Boolean);
+ for(let [name,fn] of [['急低下',d=>d<=-3],['安定',d=>d>-3&&d<3],['急上昇',d=>d>=3]]){
+  let a=deltas.filter(x=>fn(x.delta)).map(x=>x.r);pressureHtml+=`<h3>前日比：${name}（${a.length}日）</h3><table><tr><th>症状</th><th>発生率</th></tr>${Object.keys(symptoms).map(k=>`<tr><td>${symptoms[k]}</td><td>${pctCount(a,k)}</td></tr>`).join('')}</table>`;
+ }
+ $('pressureSummary').innerHTML=withP.length?pressureHtml:'<p class="muted">気圧データがまだありません。毎日の記録で気圧を取得すると比較できます。</p>';
+ let period=vals.filter(r=>r.menstruation),nonPeriod=vals.filter(r=>!r.menstruation);
+ let periodRows=Object.keys(symptoms).map(k=>`<tr><td>${symptoms[k]}</td><td>${pctCount(period,k)}</td><td>${pctCount(nonPeriod,k)}</td></tr>`).join('');
+ let ratingRows=['good','normal','bad'].map((k,i)=>{let label=['😊 良い','😐 普通','😣 悪い'][i];return `<tr><td>${label}</td><td>${period.length?Math.round(period.filter(r=>r.healthRating===k).length/period.length*100):0}%</td><td>${nonPeriod.length?Math.round(nonPeriod.filter(r=>r.healthRating===k).length/nonPeriod.length*100):0}%</td></tr>`}).join('');
+ $('periodSummary').innerHTML=`<p class="hint">生理中 ${period.length}日／生理中以外 ${nonPeriod.length}日</p><table><tr><th>症状</th><th>生理中</th><th>それ以外</th></tr>${periodRows}</table><h3>総合的な体調評価の割合</h3><table><tr><th>評価</th><th>生理中</th><th>それ以外</th></tr>${ratingRows}</table>`;
+ let yes=vals.filter(r=>r.fluzine),no=vals.filter(r=>!r.fluzine),pct=(a,k)=>a.length?Math.round(a.filter(r=>r[k]).length/a.length*100)+'%':'—';
+ $('fluzineSummary').innerHTML=`<table><tr><th>症状</th><th>Fluzineあり（${yes.length}日）</th><th>なし（${no.length}日）</th></tr><tr><td>過眠</td><td>${pct(yes,'oversleep')}</td><td>${pct(no,'oversleep')}</td></tr><tr><td>無気力</td><td>${pct(yes,'unmotivated')}</td><td>${pct(no,'unmotivated')}</td></tr></table><p class="hint">記録日数が少ない場合は参考値です。薬の副作用かどうかはこの比較だけでは判断できません。</p>`;
+}
+function renderMeds(){let r=records(),dates=Object.keys(r).sort(),range=$('medRange').value;if(range!=='all'){let cut=new Date();cut.setDate(cut.getDate()-(+range-1));dates=dates.filter(d=>new Date(d+'T23:59:59')>=cut)}$('medSummary').innerHTML=`<table><tr><th>薬</th><th>チェック日数</th><th>記録日比</th></tr>${Object.keys(medNames).map(k=>{let n=dates.filter(d=>r[d][k]).length;return `<tr><td>${medNames[k]}</td><td>${n} / ${dates.length}日</td><td>${dates.length?Math.round(n/dates.length*100):0}%</td></tr>`}).join('')}</table><p class="hint">記録日比は、何らかの記録を保存した日数に対する割合です。服用指示どおりかどうかの判定ではありません。</p>`}
+$('medRange').onchange=renderMeds;$('analysisRange').onchange=renderAnalysis;function renderAll(){renderCalendar();renderAnalysis();renderMeds();weatherMarks()}
+load();renderAll();
+</script>
+</body></html>
