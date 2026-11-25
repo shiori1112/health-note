@@ -25,6 +25,12 @@ button.secondary,.mini{border:1px solid var(--line);background:#fff;color:var(--
 .pill{display:inline-block;background:#fbe6ee;color:var(--deep);border-radius:20px;padding:3px 8px;font-size:11px;margin:2px}canvas{width:100%;height:300px;display:block}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border-bottom:1px solid var(--line);padding:8px 5px;text-align:left}th{color:var(--deep)}.actions button{min-height:42px}
 .analysis-toggle{width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left;border:0;background:transparent;color:var(--deep);font:inherit;font-weight:700;padding:3px 0;cursor:pointer}.analysis-content[hidden]{display:none}.analysis-card h2{margin:0}
 @media(min-width:520px){.day{min-height:65px;padding:7px}.grid2{grid-template-columns:repeat(4,1fr)}}
+
+.feeling-wrap{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.feeling-title{font-weight:700;margin-bottom:9px}
+.feeling-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.feeling-btn{flex:1;min-width:86px;min-height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-size:15px;padding:9px 8px}
+.feeling-btn.selected{background:var(--pale);border:2px solid var(--deep);font-weight:700}
 </style>
 </head>
 <body>
@@ -52,7 +58,7 @@ button.secondary,.mini{border:1px solid var(--line);background:#fff;color:var(--
 <div class="card"><h2>🌸 薬</h2>
 <div class="row"><label class="check"><input type="checkbox" id="morningMeds">朝の薬</label></div><div class="row"><label class="check"><input type="checkbox" id="nightMeds">夜の薬</label></div><div class="row"><label class="check"><input type="checkbox" id="herb1">漢方（1回目）</label></div><div class="row"><label class="check"><input type="checkbox" id="herb2">漢方（2回目）</label></div><div class="row"><label class="check"><input type="checkbox" id="lesiton1">Lesiton（1回目）</label></div><div class="row"><label class="check"><input type="checkbox" id="lesiton2">Lesiton（2回目）</label></div><div class="row"><label class="check"><input type="checkbox" id="celecolen">Celecolen</label></div><div class="row"><label class="check"><input type="checkbox" id="fluzine">Fluzine</label></div></div>
 <div class="card"><h2>🌸 気温・気圧・場所</h2><button class="primary" id="weatherBtn" type="button">📍 現在地の気温・気圧を取得</button>
-<div class="box"><div>場所：<b id="place">未取得</b></div><div>🌞 今日の最高気温：<b id="tempMax">—</b></div><div>❄️ 今日の最低気温：<b id="tempMin">—</b></div><div>気圧：<b id="pressure">—</b></div><div id="weatherMarks" class="row"></div>
+<div class="box"><div>場所：<b id="place">未取得</b></div><div>🌞 今日の最高気温：<b id="tempMax">—</b></div><div>❄️ 今日の最低気温：<b id="tempMin">—</b></div><div>気圧：<b id="pressure">—</b></div><input type="hidden" id="tempFeeling" value=""><div class="feeling-wrap"><div class="feeling-title">🌡️ 今日の体感温度</div><div class="feeling-buttons" role="group" aria-label="今日の体感温度"><button type="button" class="feeling-btn" data-feeling="hot">🥵 暑い</button><button type="button" class="feeling-btn" data-feeling="normal">🙂 普通</button><button type="button" class="feeling-btn" data-feeling="cold">🥶 寒い</button></div><p class="hint">その日の自分の感じ方を1つ選んでください。もう一度タップすると解除できます。</p></div><div id="weatherMarks" class="row"></div>
 <p class="hint">高低気圧の目安は1013.25hPa、気温の急変は前日比±3℃以上です。気象データの目安であり、医学的な判定ではありません。</p></div><div class="status" id="weatherStatus"></div></div>
 <div class="card"><h2>🌸 備考</h2><textarea id="notes" placeholder="体調の変化、食事、睡眠、気になったことなど…"></textarea></div>
 <div class="actions"><button class="primary" id="saveBtn">記録を保存</button><button class="secondary" id="exportBtn">記録を書き出す</button><button class="secondary" id="clearBtn">この日の記録をクリア</button></div><div class="status" id="saveStatus"></div>
@@ -62,6 +68,7 @@ button.secondary,.mini{border:1px solid var(--line);background:#fff;color:var(--
 <div class="card"><h2>📊 グラフ・分析</h2><div class="row">集計期間：<select id="analysisRange"><option value="7">直近7日</option><option value="30" selected>直近30日</option><option value="90">直近3か月</option><option value="all">全期間</option></select></div><p class="hint">各項目をタップすると分析内容を表示します。</p></div>
 <div class="card analysis-card"><h2><button class="analysis-toggle" type="button" aria-expanded="false">体調の発生頻度 <span>＋</span></button></h2><div class="analysis-content" hidden><p class="hint">各症状の発生頻度と、その期間の総合評価です。</p><div id="overallSummary"></div><canvas id="symptomChart" width="620" height="460"></canvas></div></div>
 <div class="card analysis-card"><h2><button class="analysis-toggle" type="button" aria-expanded="false">気温と体調 <span>＋</span></button></h2><div class="analysis-content" hidden><p class="hint">最高気温と最低気温の平均を、その日の代表気温として比較します。区分は便宜上の目安です。</p><div id="temperatureSummary"></div></div></div>
+<div class="card analysis-card"><h2><button class="analysis-toggle" type="button" aria-expanded="false">体感温度と体調 <span>＋</span></button></h2><div class="analysis-content" hidden><p class="hint">自分で記録した「暑い・普通・寒い」ごとに、総合評価・睡眠・症状の記録割合を比較します。</p><div id="feelingSummary"></div></div></div>
 <div class="card analysis-card"><h2><button class="analysis-toggle" type="button" aria-expanded="false">気圧と体調 <span>＋</span></button></h2><div class="analysis-content" hidden><p class="hint">気圧の高さ（1013.25hPaを目安）と前日からの変化（±3hPa以上を急変の目安）を比較します。</p><div id="pressureSummary"></div></div></div>
 <div class="card analysis-card"><h2><button class="analysis-toggle" type="button" aria-expanded="false">睡眠の分析 <span>＋</span></button></h2><div class="analysis-content" hidden><p class="hint">過眠・不眠・通常（どちらもチェックなし）の日を比較します。両方にチェックした日は、過眠・不眠の両方に含めます。</p><div id="sleepSummary"></div></div></div>
 <div class="card analysis-card"><h2><button class="analysis-toggle" type="button" aria-expanded="false">生理中と体調 <span>＋</span></button></h2><div class="analysis-content" hidden><p class="hint">生理中にチェックした日と、それ以外の日の症状・総合評価を比較します。</p><div id="periodSummary"></div></div></div>
@@ -71,7 +78,7 @@ button.secondary,.mini{border:1px solid var(--line);background:#fff;color:var(--
 </main>
 <script>
 const $=id=>document.getElementById(id);
-const fields=['headache','headacheLevel','nausea','stomach','diarrhea','stomachPain','healthRating','dizzy','faint','palpitations','edema','backPain','periodPain','appetiteLoss','oversleep','insomnia','unmotivated','fatigue','overactive','tinnitus','chills','bowel','bowelCount','menstruation','morningMeds','nightMeds','herb1','herb2','lesiton1','lesiton2','celecolen','fluzine','place','tempMax','tempMin','pressure','notes'];
+const fields=['headache','headacheLevel','nausea','stomach','diarrhea','stomachPain','healthRating','dizzy','faint','palpitations','edema','backPain','periodPain','appetiteLoss','oversleep','insomnia','unmotivated','fatigue','overactive','tinnitus','chills','bowel','bowelCount','menstruation','morningMeds','nightMeds','herb1','herb2','lesiton1','lesiton2','celecolen','fluzine','place','tempMax','tempMin','pressure','tempFeeling','notes'];
 const symptoms={headache:'頭痛',nausea:'吐き気',stomach:'腹痛',diarrhea:'下痢',stomachPain:'胃痛',dizzy:'めまい',faint:'脳貧血',palpitations:'動悸',edema:'むくみ',backPain:'腰痛',periodPain:'生理痛',appetiteLoss:'食欲不振',unmotivated:'無気力',fatigue:'倦怠感',overactive:'過活動',tinnitus:'耳鳴り',chills:'悪寒'};
 const medNames={lesiton1:'Lesiton（1回目）',lesiton2:'Lesiton（2回目）',celecolen:'Celecolen',fluzine:'Fluzine'};
 const today=()=>{let d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -79,7 +86,9 @@ $('recordDate').value=today();let viewMonth=new Date();
 const storageKey=d=>'healthnote_'+d;
 function records(){let out={};for(let i=0;i<localStorage.length;i++){let k=localStorage.key(i);if(k.startsWith('healthnote_'))try{out[k.slice(11)]=JSON.parse(localStorage.getItem(k))}catch(e){}}return out}
 function read(){let o={};fields.forEach(id=>{let e=$(id);o[id]=e.type==='checkbox'?e.checked:(['place','tempMax','tempMin','pressure'].includes(id)?e.textContent:e.value)});return o}
-function fill(o){fields.forEach(id=>{let e=$(id),v=o?.[id];if(e.type==='checkbox')e.checked=!!v;else if(['place','tempMax','tempMin','pressure'].includes(id))e.textContent=v||(id==='place'?'未取得':'—');else e.value=v!==undefined?v:(id==='bowelCount'?'0':'')});$('bowelCount').textContent=$('bowelCount').value||'0';weatherMarks()}
+function fill(o){fields.forEach(id=>{let e=$(id),v=o?.[id];if(e.type==='checkbox')e.checked=!!v;else if(['place','tempMax','tempMin','pressure'].includes(id))e.textContent=v||(id==='place'?'未取得':'—');else if(e)e.value=v!==undefined?v:(id==='bowelCount'?'0':'')});$('bowelCount').textContent=$('bowelCount').value||'0';updateFeelingButtons();weatherMarks()}
+function updateFeelingButtons(){document.querySelectorAll('.feeling-btn').forEach(b=>{let selected=b.dataset.feeling===($('tempFeeling')?.value||'');b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',selected?'true':'false')})}
+document.querySelectorAll('.feeling-btn').forEach(b=>b.addEventListener('click',()=>{let input=$('tempFeeling');input.value=input.value===b.dataset.feeling?'':b.dataset.feeling;updateFeelingButtons();save(true);$('saveStatus').textContent='体感温度を記録しました 🌸'}));
 function save(silent=false){localStorage.setItem(storageKey($('recordDate').value),JSON.stringify(read()));if(!silent)$('saveStatus').textContent='保存しました 🌸';renderAll()}
 function load(){let s=localStorage.getItem(storageKey($('recordDate').value));fill(s?JSON.parse(s):null);$('saveStatus').textContent=s?'保存済みの記録を表示しています。':'この日の記録はまだありません。'}
 $('saveBtn').onclick=()=>save();$('recordDate').onchange=load;
@@ -104,6 +113,17 @@ function renderTemperature(vals){
  for(const g of groups){const a=eligible.filter(r=>g.test(r.representativeTemp));const avg=a.length?(a.reduce((s,r)=>s+r.representativeTemp,0)/a.length).toFixed(1)+'℃':'—';const rating=['good','normal','bad'].map((k,i)=>{let n=a.filter(r=>r.healthRating===k).length;return `<td>${a.length?Math.round(n/a.length*100)+'%（'+n+'日）':'—'}</td>`}).join('');html+=`<h3>${g.name}（${a.length}日・平均${avg}）</h3><table><tr><th>体調評価</th><th>😊 良い</th><th>😐 普通</th><th>😣 悪い</th></tr><tr><td>割合</td>${rating}</tr></table><table><tr><th>症状</th><th>発生率</th></tr>${Object.entries(symptoms).map(([k,label])=>`<tr><td>${label}</td><td>${pctCount(a,k)}</td></tr>`).join('')}</table>`}
  $('temperatureSummary').innerHTML=html;
 }
+
+function renderFeeling(vals){
+ const groups=[{key:'hot',name:'🥵 暑い'},{key:'normal',name:'🙂 普通'},{key:'cold',name:'🥶 寒い'}];
+ const any=vals.some(r=>groups.some(g=>r.tempFeeling===g.key));
+ if(!any){$('feelingSummary').innerHTML='<p class="muted">体感温度の記録がまだありません。毎日の記録で「暑い・普通・寒い」を選ぶと、ここに比較が表示されます。</p>';return}
+ let html='<table><tr><th>体感</th><th>日数</th><th>体調「悪い」</th><th>過眠</th><th>不眠</th></tr>';
+ for(const g of groups){const a=vals.filter(r=>r.tempFeeling===g.key);const rate=k=>a.length?`${Math.round(a.filter(r=>!!r[k]).length/a.length*100)}%（${a.filter(r=>!!r[k]).length}日）`:'—';html+=`<tr><td>${g.name}</td><td>${a.length}</td><td>${a.length?Math.round(a.filter(r=>r.healthRating==='bad').length/a.length*100)+'%（'+a.filter(r=>r.healthRating==='bad').length+'日）':'—'}</td><td>${rate('oversleep')}</td><td>${rate('insomnia')}</td></tr>`}
+ html+='</table><h3>体感別・症状の発生率</h3><table><tr><th>症状</th>'+groups.map(g=>`<th>${g.name}</th>`).join('')+'</tr>';
+ for(const [k,label] of Object.entries(symptoms))html+=`<tr><td>${label}</td>${groups.map(g=>`<td>${pctCount(vals.filter(r=>r.tempFeeling===g.key),k)}</td>`).join('')}</tr>`;
+ $('feelingSummary').innerHTML=html+'</table><p class="hint">体感の記録がある日だけを対象にした単純比較です。関連を示すもので、気温や体感が症状を引き起こしたという意味ではありません。</p>';
+}
 function renderSleep(vals){
  const groups=[{name:'過眠',arr:vals.filter(r=>r.oversleep)},{name:'不眠',arr:vals.filter(r=>r.insomnia)},{name:'通常（チェックなし）',arr:vals.filter(r=>!r.oversleep&&!r.insomnia)}];
  const symptomKeys=Object.keys(symptoms);
@@ -111,6 +131,8 @@ function renderSleep(vals){
  for(const g of groups){let a=g.arr,bad=a.filter(r=>r.healthRating==='bad').length,temps=a.map(r=>{let x=parseFloat(r.tempMax),n=parseFloat(r.tempMin);return Number.isFinite(x)&&Number.isFinite(n)?(x+n)/2:null}).filter(x=>x!==null),press=a.map(r=>parseFloat(r.pressure)).filter(Number.isFinite);html+=`<tr><td>${g.name}</td><td>${a.length}</td><td>${a.length?Math.round(bad/a.length*100)+'%（'+bad+'日）':'—'}</td><td>${temps.length?(temps.reduce((s,x)=>s+x,0)/temps.length).toFixed(1)+'℃（'+temps.length+'日）':'—'}</td><td>${press.length?(press.reduce((s,x)=>s+x,0)/press.length).toFixed(1)+'hPa（'+press.length+'日）':'—'}</td></tr>`}
  html+='</table><h3>症状の発生率</h3><table><tr><th>症状</th>'+groups.map(g=>`<th>${g.name}</th>`).join('')+'</tr>';
  for(const k of symptomKeys)html+=`<tr><td>${symptoms[k]}</td>${groups.map(g=>`<td>${pctCount(g.arr,k)}</td>`).join('')}</tr>`;
+ html+='</table><h3>睡眠区分と総合的な体調評価</h3><table><tr><th>睡眠区分</th><th>😊 良い</th><th>😐 普通</th><th>😣 悪い</th></tr>';
+ for(const g of groups){const a=g.arr;html+=`<tr><td>${g.name}</td>${['good','normal','bad'].map(k=>`<td>${a.length?Math.round(a.filter(r=>r.healthRating===k).length/a.length*100)+'%（'+a.filter(r=>r.healthRating===k).length+'日）':'—'}</td>`).join('')}</tr>`}
  $('sleepSummary').innerHTML=html+'</table><p class="hint">これは記録上の関連を比較するもので、睡眠が体調や気温・気圧を引き起こしたという意味ではなく、医学的な診断でもありません。各項目の括弧内はデータがある日数です。</p>';
 }
 function renderAnalysis(){
@@ -120,7 +142,7 @@ function renderAnalysis(){
  let good=vals.filter(r=>r.healthRating==='good').length,normal=vals.filter(r=>r.healthRating==='normal').length,bad=vals.filter(r=>r.healthRating==='bad').length;
  $('overallSummary').innerHTML=`<div class="grid2"><div class="metric">😊 良い<b>${good}日</b></div><div class="metric">😐 普通<b>${normal}日</b></div><div class="metric">😣 悪い<b>${bad}日</b></div><div class="metric">集計対象<b>${vals.length}日</b></div></div>`;
  bars(Object.entries(symptoms).map(([k,v])=>({label:v,v:vals.filter(r=>r[k]).length})));
- renderTemperature(vals);renderSleep(vals);
+ renderTemperature(vals);renderFeeling(vals);renderSleep(vals);
  let withP=vals.filter(r=>Number.isFinite(parseFloat(r.pressure))),pressureHtml='';
  for(let [name,fn] of [['低気圧寄り',r=>parseFloat(r.pressure)<1013.25],['高気圧寄り',r=>parseFloat(r.pressure)>=1013.25]]){let a=withP.filter(fn);pressureHtml+=`<h3>${name}（${a.length}日）</h3><table><tr><th>症状</th><th>発生率</th></tr>${Object.keys(symptoms).map(k=>`<tr><td>${symptoms[k]}</td><td>${pctCount(a,k)}</td></tr>`).join('')}</table>`}
  let byDate=Object.fromEntries(vals.map(r=>[r._date,r]));
