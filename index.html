@@ -65,7 +65,8 @@ button.secondary,.mini{border:1px solid var(--line);background:#fff;color:var(--
 </section>
 <section id="calendarPanel" class="panel"><div class="card"><h2>📅 月間カレンダー</h2><div class="calendar-head"><button id="prevMonth">‹ 前月</button><b id="monthLabel"></b><button id="nextMonth">翌月 ›</button></div><div class="calendar" id="calendar"></div><p class="hint">🌸 生理中　● 頭痛　◆ 下痢　☾ 過眠　▲ めまい　🤢 吐き気　! 脳貧血　× 総合評価「悪い」。日付をタップすると記録を確認できます。</p></div></section>
 <section id="analysis" class="panel">
-<div class="card"><h2>📊 グラフ・分析</h2><div class="row">集計期間：<select id="analysisRange"><option value="7">直近7日</option><option value="30" selected>直近30日</option><option value="90">直近3か月</option><option value="all">全期間</option></select></div><p class="hint">各項目をタップすると分析内容を表示します。</p></div>
+<div class="card"><h2>📊 グラフ・分析</h2><div class="row">集計期間：<select id="analysisRange"><option value="7">直近7日</option><option value="14">直近14日</option><option value="20">直近20日</option><option value="30" selected>直近30日</option><option value="90">直近3か月</option><option value="all">全期間</option></select></div><p class="hint">各項目をタップすると分析内容を表示します。</p></div>
+<div class="card analysis-card"><h2><button class="analysis-toggle" type="button" aria-expanded="false">排便のまとめ <span>＋</span></button></h2><div class="analysis-content" hidden><p class="hint">その日の体調記録を保存していて排便回数が0回なら「排便なし」として集計します。体調記録自体がない日は未記録として除外します。</p><div id="bowelSummary"></div></div></div>
 <div class="card analysis-card"><h2><button class="analysis-toggle" type="button" aria-expanded="false">体調の発生頻度 <span>＋</span></button></h2><div class="analysis-content" hidden><p class="hint">各症状の発生頻度と、その期間の総合評価です。</p><div id="overallSummary"></div><canvas id="symptomChart" width="620" height="460"></canvas></div></div>
 <div class="card analysis-card"><h2><button class="analysis-toggle" type="button" aria-expanded="false">気温と体調 <span>＋</span></button></h2><div class="analysis-content" hidden><p class="hint">最高気温と最低気温の平均を、その日の代表気温として比較します。区分は便宜上の目安です。</p><div id="temperatureSummary"></div></div></div>
 <div class="card analysis-card"><h2><button class="analysis-toggle" type="button" aria-expanded="false">体感温度と体調 <span>＋</span></button></h2><div class="analysis-content" hidden><p class="hint">自分で記録した「暑い・普通・寒い」ごとに、総合評価・睡眠・症状の記録割合を比較します。</p><div id="feelingSummary"></div></div></div>
@@ -135,6 +136,17 @@ function renderSleep(vals){
  for(const g of groups){const a=g.arr;html+=`<tr><td>${g.name}</td>${['good','normal','bad'].map(k=>`<td>${a.length?Math.round(a.filter(r=>r.healthRating===k).length/a.length*100)+'%（'+a.filter(r=>r.healthRating===k).length+'日）':'—'}</td>`).join('')}</tr>`}
  $('sleepSummary').innerHTML=html+'</table><p class="hint">これは記録上の関連を比較するもので、睡眠が体調や気温・気圧を引き起こしたという意味ではなく、医学的な診断でもありません。各項目の括弧内はデータがある日数です。</p>';
 }
+
+function renderBowel(vals){
+ // A saved daily health record with bowelCount=0 means no bowel movement that day.
+ // Dates with no saved daily record are absent from vals and are not treated as zero.
+ const recorded=vals.filter(r=>r.bowelCount!==undefined||r.bowel!==undefined);
+ const total=recorded.reduce((sum,r)=>sum+Math.max(0,Number.parseInt(r.bowelCount,10)||0),0);
+ const daysWithBowel=recorded.filter(r=>(Number.parseInt(r.bowelCount,10)||0)>0||r.bowel===true).length;
+ const daysWithoutBowel=recorded.filter(r=>(Number.parseInt(r.bowelCount,10)||0)===0&&r.bowel!==true).length;
+ const avg=recorded.length?(total/recorded.length).toFixed(1):'—';
+ $('bowelSummary').innerHTML=recorded.length?`<div class="grid2"><div class="metric">排便回数の合計<b>${total}回</b></div><div class="metric">記録日あたり平均<b>${avg}回</b></div><div class="metric">排便があった日<b>${daysWithBowel}日</b></div><div class="metric">排便がなかった日<b>${daysWithoutBowel}日</b></div><div class="metric">記録日数<b>${recorded.length}日</b></div></div><p class="hint">平均は、体調記録を保存した${recorded.length}日分で計算しています。保存した日の排便回数が0回なら「排便なし」として含め、体調記録自体がない日は除外します。診察時には「記録期間中、1日平均${avg}回（合計${total}回）、排便があった日は${daysWithBowel}日、なかった日は${daysWithoutBowel}日」と伝えられます。</p>`:'<p class="muted">この期間の体調記録はまだありません。</p>';
+}
 function renderAnalysis(){
  let all=records(),dates=Object.keys(all).sort(),range=$('analysisRange')?.value||'30';
  if(range!=='all'){let days=range==='90'?90:+range,cut=new Date();cut.setHours(0,0,0,0);cut.setDate(cut.getDate()-(days-1));dates=dates.filter(d=>new Date(d+'T12:00:00')>=cut)}
@@ -142,7 +154,7 @@ function renderAnalysis(){
  let good=vals.filter(r=>r.healthRating==='good').length,normal=vals.filter(r=>r.healthRating==='normal').length,bad=vals.filter(r=>r.healthRating==='bad').length;
  $('overallSummary').innerHTML=`<div class="grid2"><div class="metric">😊 良い<b>${good}日</b></div><div class="metric">😐 普通<b>${normal}日</b></div><div class="metric">😣 悪い<b>${bad}日</b></div><div class="metric">集計対象<b>${vals.length}日</b></div></div>`;
  bars(Object.entries(symptoms).map(([k,v])=>({label:v,v:vals.filter(r=>r[k]).length})));
- renderTemperature(vals);renderFeeling(vals);renderSleep(vals);
+ renderBowel(vals);renderTemperature(vals);renderFeeling(vals);renderSleep(vals);
  let withP=vals.filter(r=>Number.isFinite(parseFloat(r.pressure))),pressureHtml='';
  for(let [name,fn] of [['低気圧寄り',r=>parseFloat(r.pressure)<1013.25],['高気圧寄り',r=>parseFloat(r.pressure)>=1013.25]]){let a=withP.filter(fn);pressureHtml+=`<h3>${name}（${a.length}日）</h3><table><tr><th>症状</th><th>発生率</th></tr>${Object.keys(symptoms).map(k=>`<tr><td>${symptoms[k]}</td><td>${pctCount(a,k)}</td></tr>`).join('')}</table>`}
  let byDate=Object.fromEntries(vals.map(r=>[r._date,r]));
